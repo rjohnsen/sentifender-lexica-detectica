@@ -20,7 +20,7 @@ class TableindexerSpider(scrapy.Spider):
     def parse(self, response):
         table_name = response.xpath("//h1/text()").get()
 
-        with open(f"{table_name.lower()}.json", "w") as table_data_file:
+        with open(f"table-schemas/{table_name.lower()}.json", "w") as table_data_file:
             table_data = {
                 "table_name": table_name,
                 "fields": []
