@@ -1,4 +1,3 @@
-from pathlib import Path
 from datetime import datetime
 import scrapy
 import csv
@@ -28,30 +27,17 @@ class TableindexerSpider(scrapy.Spider):
     def parse(self, response):
         table = Table()
         table["scraped"] = datetime.now()
-        table["name"] = response.xpath("//h1/text()").get()
         table["fields"] = []
 
-        for row in response.xpath("//tr"):
-            field = Field()
-            counter = 0
+        table["name"] = response.css("div.content").xpath("h1/text()").get()
 
-            for cell in row.xpath("td"):
-
-                if counter < 2:
-                    text = cell.xpath("code/text()").get()
-
-                    if counter == 0:
-                        field["name"] = text
-                    elif counter == 1: 
-                        field["definition"] = text
-                else:
-                    field["description"] = cell.xpath("text()").get()
-
-                table["fields"].append(field)
-
-                counter += 1
-
-        yield table
+        for row in response.css("div.content").xpath("//table/tbody/tr"):
+            tds = row.xpath("td")
             
+            table["fields"].append(Field(
+                name=tds[0].xpath("code/text()").get(),
+                definition=tds[1].xpath("code/text()").get(),
+                description=tds[2].xpath("text()").get()
+            ))
 
-
+        return table
