@@ -1,6 +1,11 @@
 from pathlib import Path
+from datetime import datetime
+
 import scrapy
-import csv
+
+class Page(scrapy.Item):
+    scraped = scrapy.Field()
+    url = scrapy.Field()
 
 class TableindexerSpider(scrapy.Spider):
     name ="tableindexer"
@@ -14,9 +19,9 @@ class TableindexerSpider(scrapy.Spider):
     def parse(self, response):
         links = response.xpath("//a/@href").extract()
 
-        with open("table-source.csv", "w") as csv_out:
-            writer = csv.writer(csv_out, delimiter=',')
-
-            for link in links:
-                if "advanced-hunting" in link and ".md" not in link and "table" in link:
-                    writer.writerow([f"https://learn.microsoft.com/en-us/microsoft-365/security/defender/{link}"])
+        for link in links:
+            if "advanced-hunting" in link and ".md" not in link and "table" in link:
+                yield Page(
+                    scraped=datetime.now(),
+                    url=f"https://learn.microsoft.com/en-us/microsoft-365/security/defender/{link}"
+                )

@@ -1,52 +1,57 @@
 from pathlib import Path
+from datetime import datetime
 import scrapy
 import csv
 import json
+
+class Table(scrapy.Item):
+    scraped = scrapy.Field()
+    name = scrapy.Field()
+    fields = scrapy.Field()
+
+class Field(scrapy.Item):
+    name = scrapy.Field()
+    definition = scrapy.Field()
+    description = scrapy.Field()
 
 class TableindexerSpider(scrapy.Spider):
     name ="tablepager"
 
     def start_requests(self):        
-        with open("table-source.csv", "r") as csv_in:
-            reader = csv.reader(csv_in, delimiter=",")
-
-            for row in reader:
-                url = row[0]
+        with open("output/links.json", "r") as linksfile:
+            for link in json.load(linksfile):
                 yield scrapy.Request(
-                    url=url,
+                    url=link["url"],
                     callback=self.parse
                 )
 
     def parse(self, response):
-        table_name = response.xpath("//h1/text()").get()
+        table = Table()
+        table["scraped"] = datetime.now()
+        table["name"] = response.xpath("//h1/text()").get()
+        table["fields"] = []
 
-        with open(f"table-schemas/{table_name.lower()}.json", "w") as table_data_file:
-            table_data = {
-                "table_name": table_name,
-                "fields": []
-            }
+        for row in response.xpath("//tr"):
+            field = Field()
+            counter = 0
 
-            for row in response.xpath("//tr"):
-                counter = 0
+            for cell in row.xpath("td"):
 
-                field = {}
+                if counter < 2:
+                    text = cell.xpath("code/text()").get()
 
-                for cell in row.xpath("td"):
-                    if counter < 2:
-                        text = cell.xpath("code/text()").get()
+                    if counter == 0:
+                        field["name"] = text
+                    elif counter == 1: 
+                        field["definition"] = text
+                else:
+                    field["description"] = cell.xpath("text()").get()
 
-                        if counter == 0:
-                            field["column_name"] = text
-                        elif counter == 1: 
-                            field["type"] = text
-                    else:
-                        field["description"] = cell.xpath("text()").get()
+                table["fields"].append(field)
 
-                    table_data["fields"].append(field)
+                counter += 1
 
-                    counter += 1
-
-            table_data_file.write(json.dumps(table_data))
+        yield table
             
 
 
