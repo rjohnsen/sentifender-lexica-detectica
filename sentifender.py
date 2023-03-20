@@ -22,6 +22,18 @@ def get_table_definition(tablename):
 	schemas = load_schemas()
 	for schema in schemas:
 		if schema["name"] == tablename.strip():
+			tmp = {}
+
+			for field in schema["fields"]:
+				tmp[field["name"]] = field
+
+			keys = list(tmp.keys())
+			keys.sort()
+			schema["fields"] = []
+
+			for key in keys:
+				schema["fields"].append(tmp[key])
+
 			return schema
 	
 	return False
