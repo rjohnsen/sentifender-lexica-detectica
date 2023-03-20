@@ -62,7 +62,7 @@ def get_pivots(selected_table):
 	return pivots
 
 with st.sidebar:
-	st.image("images/kusto-alt-icon-original.svg")
+	st.image("images/kusto-alt-icon-original.svg", width=200)
 
 	st.title("Sentifender Lexica Detectica")
 	table_names = get_table_names()
