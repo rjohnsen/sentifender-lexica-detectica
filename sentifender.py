@@ -85,17 +85,27 @@ if schema_data is not False:
 	pivots = get_pivots(selected_table)
 
 	for pivot in pivots:
-		st.markdown(f"#### {pivot['to']}")
-		st.table(pivot)
+		st.markdown(f"#### {pivot['to']} (table)")
 
-		st.write("The following Kusto query is machine generated and serves as a skeleton for further refinement by the analyst.")
+		col1, col2 = st.columns(2)
+
+		pivot["via"].sort()
+		col1.markdown("**Pivot field(s)**")
+		col1.markdown(f"> These are the fields that was found in both {pivot['from']} and {pivot['to']}:")
+		col1.table({"field": pivot["via"]})
+
+		col2.markdown("**Kusto example**")
+		col2.write("> The following Kusto query is machine generated and serves as a skeleton for further refinement by the analyst.")
 		variable_name = f"{pivot['via'][0].lower()}Var"
+
 		code_example = f'''
 let {variable_name}="";
 {selected_table}
 | where {pivot["via"][0]} == {variable_name}
 | join kind=inner {pivot["to"]} on $left.{pivot["via"][0]} == $right.{pivot["via"][0]}'''
-		st.code(code_example, language="powershell")
+		col2.code(code_example, language="powershell")
+
+		st.write("---")
 else:
 	st.write(f"Oh ... {selected_table} can't be found.")
 
