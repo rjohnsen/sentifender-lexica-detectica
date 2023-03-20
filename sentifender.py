@@ -72,6 +72,8 @@ with st.sidebar:
 		table_names
 	)
 
+	st.markdown("[Made by Roger Johnsen, 2023](https://github.com/rjohnsen)")
+
 schema_data = get_table_definition(selected_table)
 
 if schema_data is not False:
