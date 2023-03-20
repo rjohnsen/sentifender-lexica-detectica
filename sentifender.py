@@ -92,7 +92,7 @@ if schema_data is not False:
 let {variable_name}="";
 {selected_table}
 | where {pivot["via"][0]} == {variable_name}
-| join type=inner {pivot["to"]} on $left.{pivot["via"][0]} == $right.{pivot["via"][0]}'''
+| join kind=inner {pivot["to"]} on $left.{pivot["via"][0]} == $right.{pivot["via"][0]}'''
 		st.code(code_example, language="powershell")
 else:
 	st.write(f"Oh ... {selected_table} can't be found.")
