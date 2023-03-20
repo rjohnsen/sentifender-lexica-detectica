@@ -52,7 +52,7 @@ def get_pivots(selected_table):
 
 	# Compare selected table with the others to find pivot points
 	schemas = load_schemas()
-	pivots = []
+	pivots = {}
 
 	for schema in schemas:
 		schema_fields = []
@@ -65,13 +65,20 @@ def get_pivots(selected_table):
 			via = list(set(source_fields).intersection(schema_fields))
 
 			if len(via) > 0:
-				pivots.append({
+				pivots[schema["name"]] = {
 					"from": selected_table,
 					"to": schema["name"],
 					"via": via 
-				})
+				}
 
-	return pivots
+	tmp = []
+	keys = list(pivots.keys())
+	keys.sort()
+
+	for key in keys:
+		tmp.append(pivots[key])
+
+	return tmp
 
 with st.sidebar:
 	st.image("images/kusto-alt-icon-original.svg", width=200)
