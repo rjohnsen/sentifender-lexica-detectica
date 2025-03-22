@@ -82,54 +82,64 @@ def get_pivots(selected_table):
 
 	return tmp
 
-with st.sidebar:
-	st.image("images/kusto-alt-icon-original.svg", width=200)
+st.title("Sentifender Lexica Detectica")
 
-	st.title("Sentifender Lexica Detectica")
+tab1, tab2, tab3 = st.tabs(["Home", "Table Index", "About"])
+
+with tab1:
+	st.image("images/kusto-alt-icon-original.svg", width=100)
+with tab2:
+	col1, col2 = st.columns(2)
+
 	table_names = get_table_names()
 
-	st.metric("Tables available", len(table_names), "")
+	with col1:
+		st.metric("Tables available", len(table_names), "")
 
-	selected_table = st.selectbox(
-		"Select table",
-		table_names
-	)
+	with col2:
+		selected_table = st.selectbox(
+			"Select table",
+			table_names
+		)
 
+	st.write("---")
+
+	schema_data = get_table_definition(selected_table)
+
+	if schema_data is not False:
+		st.write(f"## {selected_table}")
+		st.write("### Schema")
+
+		st.write(Markdown.renderTable(schema_data["fields"]))
+
+		st.write(f"### Pivot points")
+		pivots = get_pivots(selected_table)
+
+		for pivot in pivots:
+			st.markdown(f"#### {pivot['to']}")
+
+			col1, col2 = st.columns(2)
+
+			pivot["via"].sort()
+			col1.write("##### Fields")
+			col1.write(Markdown.renderList(pivot["via"]))
+
+			col2.markdown("##### Kusto example")
+			col2.write("> The following Kusto query is machine generated and serves as a skeleton for further refinement by the analyst.")
+			variable_name = f"{pivot['via'][0].lower()}Var"
+
+			code_example = f'''
+	let {variable_name}="";
+	{selected_table}
+	| where {pivot["via"][0]} == {variable_name}
+	| join kind=inner {pivot["to"]} on $left.{pivot["via"][0]} == $right.{pivot["via"][0]}'''
+			col2.code(code_example, language="powershell")
+
+			st.write("---")
+	else:
+		st.write(f"Oh ... {selected_table} can't be found.")
+with tab3:
 	st.markdown("[Made by Roger Johnsen, 2023 - 2025](https://github.com/rjohnsen)")
 
-schema_data = get_table_definition(selected_table)
-
-if schema_data is not False:
-	st.write(f"# {selected_table}")
-	st.write("## Schema")
-
-	st.write(Markdown.renderTable(schema_data["fields"]))
-
-	st.write(f"## Pivot points")
-	pivots = get_pivots(selected_table)
-
-	for pivot in pivots:
-		st.markdown(f"#### {pivot['to']}")
-
-		col1, col2 = st.columns(2)
-
-		pivot["via"].sort()
-		col1.write("#### Fields")
-		col1.write(Markdown.renderList(pivot["via"]))
-
-		col2.markdown("#### Kusto example")
-		col2.write("> The following Kusto query is machine generated and serves as a skeleton for further refinement by the analyst.")
-		variable_name = f"{pivot['via'][0].lower()}Var"
-
-		code_example = f'''
-let {variable_name}="";
-{selected_table}
-| where {pivot["via"][0]} == {variable_name}
-| join kind=inner {pivot["to"]} on $left.{pivot["via"][0]} == $right.{pivot["via"][0]}'''
-		col2.code(code_example, language="powershell")
-
-		st.write("---")
-else:
-	st.write(f"Oh ... {selected_table} can't be found.")
 
 
