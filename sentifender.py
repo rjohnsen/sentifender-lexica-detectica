@@ -1,6 +1,8 @@
 import streamlit as st
 import json
 
+from lib.markdown import Markdown
+
 st. set_page_config(layout="wide")
 
 def load_schemas():
@@ -86,34 +88,36 @@ with st.sidebar:
 	st.title("Sentifender Lexica Detectica")
 	table_names = get_table_names()
 
+	st.metric("Tables available", len(table_names), "")
+
 	selected_table = st.selectbox(
 		"Select table",
 		table_names
 	)
 
-	st.markdown("[Made by Roger Johnsen, 2023](https://github.com/rjohnsen)")
+	st.markdown("[Made by Roger Johnsen, 2023 - 2025](https://github.com/rjohnsen)")
 
 schema_data = get_table_definition(selected_table)
 
 if schema_data is not False:
-	st.header(f"{selected_table} (table)")
-	st.subheader("Schema")
-	st.table(schema_data["fields"])
+	st.write(f"# {selected_table}")
+	st.write("## Schema")
 
-	st.subheader(f"From {selected_table} you can pivot to ...")
+	st.write(Markdown.renderTable(schema_data["fields"]))
+
+	st.write(f"## Pivot points")
 	pivots = get_pivots(selected_table)
 
 	for pivot in pivots:
-		st.markdown(f"#### {pivot['to']} (table)")
+		st.markdown(f"#### {pivot['to']}")
 
 		col1, col2 = st.columns(2)
 
 		pivot["via"].sort()
-		col1.markdown("**Pivot field(s)**")
-		col1.markdown(f"> These are the fields that was found in both {pivot['from']} and {pivot['to']}:")
-		col1.table({"field": pivot["via"]})
+		col1.write("#### Fields")
+		col1.write(Markdown.renderList(pivot["via"]))
 
-		col2.markdown("**Kusto example**")
+		col2.markdown("#### Kusto example")
 		col2.write("> The following Kusto query is machine generated and serves as a skeleton for further refinement by the analyst.")
 		variable_name = f"{pivot['via'][0].lower()}Var"
 
