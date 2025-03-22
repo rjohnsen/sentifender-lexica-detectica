@@ -84,10 +84,18 @@ def get_pivots(selected_table):
 
 st.title("Sentifender Lexica Detectica")
 
-tab1, tab2, tab3 = st.tabs(["Home", "Table Index", "About"])
+tab1, tab2, tab3 = st.tabs(["Home", "XDR Tables", "Contact"])
 
 with tab1:
-	st.image("images/kusto-alt-icon-original.svg", width=100)
+	col1, col2 = st.columns(2)
+
+	with col1:
+		st.write("## Welcome")
+		st.write("""
+**Sentifender Lexica Detectica** is a searchable reference for Microsoft Defender XDR tables and schemas, designed specifically for threat hunters. Developed by **Roger Johnsen**, the founder of the [**Predefender Initiative on Threat Hunting**](https://www.predefender.com/), it provides a structured overview of available data sources, making it easier to understand pivoting possibilities during investigations. This resource also serves as a companion guide to [Predefender Threat Hunt Book](https://huntbook.predefender.com/), enhancing structured threat hunting workflows.  
+""")
+	with col2:
+		st.image("images/t2.webp", width=1024)
 with tab2:
 	col1, col2 = st.columns(2)
 
@@ -139,7 +147,6 @@ with tab2:
 	else:
 		st.write(f"Oh ... {selected_table} can't be found.")
 with tab3:
-	st.markdown("[Made by Roger Johnsen, 2023 - 2025](https://github.com/rjohnsen)")
+	st.image("images/whatsapp-qr.png")
 
-
-
+	
